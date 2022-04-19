@@ -3,14 +3,23 @@ import Form from "./form";
 
 describe('should be when the form is mounted', () => {
 
-    it('should be a create product from page', () => {
+    beforeEach( () => render(<Form />) );
 
-        render(<Form />);
+    it('should be a create product from page', () => {
 
         expect(
             screen.getByRole('heading', { name: /create product/i } )
         ).toBeInTheDocument();
     })
 
-    test('should exists fields: name, size, type (electronic, furniture, clothing) and submit button', () => { second })
+    test('should exists fields: name, size, type (electronic, furniture, clothing)', () => {
+
+        expect( screen.getByLabelText(/name/i) ).toBeInTheDocument();
+        expect( screen.getByLabelText(/size/i) ).toBeInTheDocument();
+        expect( screen.getByLabelText(/type/i) ).toBeInTheDocument();
+
+        expect( screen.queryByText(/electronic/i) ).toBeInTheDocument();
+        expect( screen.queryByText(/furniture/i) ).toBeInTheDocument();
+        expect( screen.queryByText(/clothing/i) ).toBeInTheDocument();
+    })
 });
