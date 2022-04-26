@@ -3,29 +3,62 @@ import React, { useState } from 'react';
 
 export const Form = () => {
     
+    const [ isSaving, SetIsSaving ] = useState(false);
     const [formErrors, setFormErrors] = useState({
         name: '',
         size: '',
         type: ''
     })
+    
+    const validateField = ({ name, value }) => {
+        setFormErrors( ( prevState ) => ({ ...prevState, [name]: value.length ? '' : `The ${ name } is required` }))
+    }
 
-    const handleSubmit = (e) => {
+    const validateForm = ({ name, size, type }) => {
+        
+        // if( !name.value ) {
+        //     // setFormErrors({ ...formErrors, name: 'The name is required' })
+        //     setFormErrors( ( prevState ) => ({ ...prevState, name: 'The name is required' }))
+        // }
+
+        // if( !size.value ) {
+        //     setFormErrors( ( prevState ) => ({ ...prevState, size: 'The size is required' }))
+        // }
+
+        // if( !type.value ) {
+        //     setFormErrors( ( prevState ) => ({ ...prevState, type: 'The type is required' }))
+        // }
+
+        validateField({ name: 'name', value: name })
+        validateField({ name: 'size', value: size })
+        validateField({ name: 'type', value: type })
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
+
+        SetIsSaving(true);
 
         const { name, size, type } = e.target.elements
 
-        if( !name.value ) {
-            // setFormErrors({ ...formErrors, name: 'The name is required' })
-            setFormErrors( ( prevState ) => ({ ...prevState, name: 'The name is required' }))
-        }
+        validateForm({ name: name.value , size: size.value, type: type.value });
 
-        if( !size.value ) {
-            setFormErrors( ( prevState ) => ({ ...prevState, size: 'The size is required' }))
-        }
+        await fetch('/products', {
+            method: 'POST',
+            body: JSON.stringify({})
+        })
 
-        if( !type.value ) {
-            setFormErrors( ( prevState ) => ({ ...prevState, type: 'The type is required' }))
-        }
+        SetIsSaving(false);
+    }
+
+    const handleBlur = e => {
+        const { name, value } = e.target;
+
+        // setFormErrors({
+        //     ...formErrors,
+        //     [name]: value.length ? '' : `The ${ name } is required`
+        // });
+        validateField({ name, value })
     }
 
   return (
@@ -35,12 +68,16 @@ export const Form = () => {
           <TextField
             label="name"
             id="name"
+            name="name"
             helperText={ formErrors.name }
+            onBlur={ handleBlur }
             />
           <TextField
             label="size"
             id="size"
+            name="size"
             helperText={ formErrors.size }
+            onBlur={ handleBlur }
             />
           <InputLabel htmlFor='type'>Type</InputLabel>
           <Select
@@ -59,7 +96,10 @@ export const Form = () => {
 
           { formErrors.type.length && <p>{ formErrors.type }</p> }
 
-          <Button type='submit'>Submit</Button>
+          <Button
+            disabled={ isSaving }
+            type='submit'
+          >Submit</Button>
       </form>
     </>
   )
