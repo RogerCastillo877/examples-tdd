@@ -2,11 +2,18 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Form from "./form";
 import { setupServer } from 'msw/node'
 import { rest } from "msw";
+import { CREATED_STATUS, ERROR_SERVER_STATUS } from "../const/httpStatus";
 
 const server = setupServer(
     rest.post('/products', (req, res, ctx) => {
 
-        return res( ctx.status(201) );
+        const { name, size, type } = req.body;
+
+        if( name && size && type ) {
+            return res( ctx.status( CREATED_STATUS ))
+        }
+
+        return res( ctx.status( ERROR_SERVER_STATUS ))
     }),
 )
 
@@ -91,7 +98,7 @@ describe('When the user blurs an emty field', () => {
 
 describe('should test when the user submits the form', () => {
 
-    test('should the submit button be desabled until the request is done', async () => {
+    it('should the submit button be desabled until the request is done', async () => {
 
         const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
 
@@ -104,5 +111,18 @@ describe('should test when the user submits the form', () => {
         await waitFor( () => {
             expect( submitBtn ).toBeDisabled();
         })
+    })
+
+    it('should display the succes message "Product stored" and clean the field values', async () => {
+
+        const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
+
+        fireEvent.change( screen.getByLabelText(/name/i), { target: { name: 'name', value: 'My product'} } ) 
+        fireEvent.change( screen.getByLabelText(/size/i), { target: { name: 'name', value: '10'} } ) 
+        fireEvent.change( screen.getByLabelText(/type/i), { target: { name: 'name', value: 'electronic'} } ) 
+
+        fireEvent.click( submitBtn );
+
+        await waitFor( () => expect( screen.getByText(/product stored/i) ).toBeInTheDocument() )
     })
 })

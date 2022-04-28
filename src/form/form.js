@@ -1,5 +1,6 @@
 import { Button, InputLabel, Select, TextField } from '@mui/material';
 import React, { useState } from 'react';
+import { CREATED_STATUS } from '../const/httpStatus';
 
 import { saveProduct } from '../services/productServices';
 
@@ -7,6 +8,7 @@ import { saveProduct } from '../services/productServices';
 export const Form = () => {
     
     const [ isSaving, SetIsSaving ] = useState(false);
+    const [ isSuccess, setIsSuccess ] = useState(false);
     const [formErrors, setFormErrors] = useState({
         name: '',
         size: '',
@@ -46,8 +48,12 @@ export const Form = () => {
 
         validateForm({ name: name.value , size: size.value, type: type.value });
 
-        await saveProduct()
+        const response = await saveProduct({ name: name.value , size: size.value, type: type.value });
 
+        if( response.status === CREATED_STATUS ) {
+            setIsSuccess(true);
+        }
+        
         SetIsSaving(false);
     }
 
@@ -64,6 +70,7 @@ export const Form = () => {
   return (
     <>
       <h1>Create product</h1>
+      { isSuccess && <p>Product Stored</p> }
       <form onSubmit={ handleSubmit }>
           <TextField
             label="name"
@@ -82,7 +89,6 @@ export const Form = () => {
           <InputLabel htmlFor='type'>Type</InputLabel>
           <Select
             native
-            value=""
             inputProps={{
                 name: 'type',
                 id: 'type'
