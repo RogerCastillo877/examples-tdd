@@ -1,6 +1,9 @@
 import { Button, InputLabel, Select, TextField } from '@mui/material';
 import React, { useState } from 'react';
 
+import { saveProduct } from '../services/productServices';
+
+
 export const Form = () => {
     
     const [ isSaving, SetIsSaving ] = useState(false);
@@ -43,10 +46,7 @@ export const Form = () => {
 
         validateForm({ name: name.value , size: size.value, type: type.value });
 
-        await fetch('/products', {
-            method: 'POST',
-            body: JSON.stringify({})
-        })
+        await saveProduct()
 
         SetIsSaving(false);
     }
