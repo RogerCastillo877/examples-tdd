@@ -96,7 +96,7 @@ describe('When the user blurs an emty field', () => {
     });
 });
 
-describe('should test when the user submits the form', () => {
+describe('should test when the user submits the form properly and the server returns created status', () => {
 
     it('should the submit button be desabled until the request is done', async () => {
 
@@ -131,5 +131,19 @@ describe('should test when the user submits the form', () => {
         expect( nameInput ).toHaveValue('');
         expect( sizeInput ).toHaveValue('');
         expect( typeSelect ).toHaveValue('');
+    });
+});
+
+describe('should be when the user submits the form and the server returns an unexpectec error', () => {
+
+    it('should be then form page must display the error message "Unexpected error, please try again"', async () => {
+        
+        const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
+        
+        fireEvent.click( submitBtn );
+
+        await waitFor( () => expect( screen.getByText(/unexpected error, please try again/i) ).toBeInTheDocument() )
+
+
     })
 })
