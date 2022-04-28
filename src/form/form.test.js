@@ -116,13 +116,20 @@ describe('should test when the user submits the form', () => {
     it('should display the succes message "Product stored" and clean the field values', async () => {
 
         const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
+        const nameInput = screen.getByLabelText(/name/i)
+        const sizeInput = screen.getByLabelText(/size/i)
+        const typeSelect = screen.getByLabelText(/type/i)
 
-        fireEvent.change( screen.getByLabelText(/name/i), { target: { name: 'name', value: 'My product'} } ) 
-        fireEvent.change( screen.getByLabelText(/size/i), { target: { name: 'name', value: '10'} } ) 
-        fireEvent.change( screen.getByLabelText(/type/i), { target: { name: 'name', value: 'electronic'} } ) 
+        fireEvent.change( nameInput, { target: { name: 'name', value: 'My product'} } ) 
+        fireEvent.change( sizeInput, { target: { name: 'name', value: '10'} } ) 
+        fireEvent.change( typeSelect, { target: { name: 'name', value: 'electronic'} } ) 
 
         fireEvent.click( submitBtn );
 
         await waitFor( () => expect( screen.getByText(/product stored/i) ).toBeInTheDocument() )
+
+        expect( nameInput ).toHaveValue('');
+        expect( sizeInput ).toHaveValue('');
+        expect( typeSelect ).toHaveValue('');
     })
 })
