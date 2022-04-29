@@ -1,9 +1,8 @@
 import { Button, InputLabel, Select, TextField } from '@mui/material';
 import React, { useState } from 'react';
-import { CREATED_STATUS, ERROR_SERVER_STATUS } from '../const/httpStatus';
+import { CREATED_STATUS, ERROR_SERVER_STATUS, INVALID_REQUEST_STATUS } from '../const/httpStatus';
 
 import { saveProduct } from '../services/productServices';
-
 
 export const Form = () => {
     
@@ -15,6 +14,19 @@ export const Form = () => {
         size: '',
         type: ''
     })
+
+    const handleFecthErrors = async ( err ) => {
+        if( err.status === ERROR_SERVER_STATUS ) {
+            setErrorMessage('Unexpected error, please try again')
+        };
+    
+        if( err.status === INVALID_REQUEST_STATUS ) {
+            
+            const data = await err.json();
+    
+            setErrorMessage( data.message );
+        }
+    }
     
     const validateField = ({ name, value }) => {
         setFormErrors( ( prevState ) => ({ ...prevState, [name]: value.length ? '' : `The ${ name } is required` }))
@@ -57,16 +69,21 @@ export const Form = () => {
 
         validateForm( getFormValues({ name, size, type }) );
 
-        const response = await saveProduct( getFormValues({ name, size, type }) );
+        try {
+            const response = await saveProduct( getFormValues({ name, size, type }) );
 
-        if( response.status === CREATED_STATUS ) {
-            e.target.reset();
-            setIsSuccess(true);
-        };
-        
-        if( response.status === ERROR_SERVER_STATUS ) {
-            setErrorMessage('Unexpected error, please try again')
-        };
+            if( !response.ok ) {
+                throw response
+            }
+
+            if( response.status === CREATED_STATUS ) {
+                e.target.reset();
+                setIsSuccess(true);
+            };
+            
+        } catch ( err ) {
+            handleFecthErrors( err );
+        }
 
         SetIsSaving(false);
     }

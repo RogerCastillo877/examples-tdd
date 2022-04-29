@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Form from "./form";
 import { setupServer } from 'msw/node'
 import { rest } from "msw";
-import { CREATED_STATUS, ERROR_SERVER_STATUS } from "../const/httpStatus";
+import { CREATED_STATUS, ERROR_SERVER_STATUS, INVALID_REQUEST_STATUS } from "../const/httpStatus";
 
 const server = setupServer(
     rest.post('/products', (req, res, ctx) => {
@@ -24,6 +24,8 @@ afterEach( () => server.resetHandlers() );
 afterAll( () => server.close() );
 
 beforeEach( () => render(<Form />) );
+
+afterEach( () => server.resetHandlers() );
 
 describe('should be when the form is mounted', () => {
 
@@ -136,14 +138,33 @@ describe('should test when the user submits the form properly and the server ret
 
 describe('should be when the user submits the form and the server returns an unexpectec error', () => {
 
-    it('should be then form page must display the error message "Unexpected error, please try again"', async () => {
+    it('should be the form page must display the error message "Unexpected error, please try again"', async () => {
         
         const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
-        
+
         fireEvent.click( submitBtn );
 
         await waitFor( () => expect( screen.getByText(/unexpected error, please try again/i) ).toBeInTheDocument() )
+    })
+})
 
+describe('should be when the user submits the form and the server returns an invalid request error', () => {
 
+    it('should be the form page must display the error message "The form is invalid, please try again"', async () => {
+        
+        const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
+
+        server.use(
+            rest.post( '/products', ( req, res, ctx) => {
+                return res(
+                    ctx.status( INVALID_REQUEST_STATUS ),
+                    ctx.json({ message: 'The form is invalid, the fields name, size, type are required' })
+                )
+            })    
+        );
+
+        fireEvent.click( submitBtn );
+
+        await waitFor( () => expect( screen.getByText(/the form is invalid, the fields name, size, type are required/i) ).toBeInTheDocument() )
     })
 })
