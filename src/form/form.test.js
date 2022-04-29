@@ -167,4 +167,20 @@ describe('should be when the user submits the form and the server returns an inv
 
         await waitFor( () => expect( screen.getByText(/the form is invalid, the fields name, size, type are required/i) ).toBeInTheDocument() )
     })
-})
+});
+
+describe('should be when the user submits the form and the server returns an invalid request error', () => {
+
+    it('should be the form page must display the error message "The form is invalid, please try again"', async () => {
+        
+        const submitBtn = screen.getByRole( 'button', {name: /submit/i} );
+
+        server.use(
+            rest.post( '/products', ( req, res) => res.networkError('Failed to connect, please try again'))    
+        );
+
+        fireEvent.click( submitBtn );
+
+        await waitFor( () => expect( screen.getByText(/connection error, please try again/i) ).toBeInTheDocument() )
+    })
+});

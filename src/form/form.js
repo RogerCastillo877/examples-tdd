@@ -18,6 +18,7 @@ export const Form = () => {
     const handleFecthErrors = async ( err ) => {
         if( err.status === ERROR_SERVER_STATUS ) {
             setErrorMessage('Unexpected error, please try again')
+            return;
         };
     
         if( err.status === INVALID_REQUEST_STATUS ) {
@@ -25,7 +26,10 @@ export const Form = () => {
             const data = await err.json();
     
             setErrorMessage( data.message );
+            return;
         }
+        
+        setErrorMessage('Connection error, please try again')
     }
     
     const validateField = ({ name, value }) => {
